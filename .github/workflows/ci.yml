@@ -1,0 +1,33 @@
+name: APF Theorem Bank CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  theorems:
+    name: Run 129 Theorems
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run full theorem bank
+        run: PYTHONPATH=src python -m apf.bank
+
+      - name: Run pytest suite
+        run: |
+          pip install pytest
+          PYTHONPATH=src python -m pytest tests/ -v
