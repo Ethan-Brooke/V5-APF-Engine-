@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APF v5.0.0 — Verification Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Serif&display=swap');
+
+:root {
+  --bg: #0a0e17;
+  --bg2: #111827;
+  --bg3: #1a2235;
+  --border: #2a3650;
+  --text: #c9d1d9;
+  --text-dim: #6b7b95;
+  --text-bright: #e6edf3;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --mono: 'JetBrains Mono', monospace;
+  --serif: 'Instrument Serif', Georgia, serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* ── Header ────────────────────────────────── */
+.hero {
+  text-align: center;
+  padding: 60px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 200px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 400;
+  color: var(--text-bright);
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.hero .subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-weight: 300;
+}
+.hero .version {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 4px 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── Status Banner ─────────────────────────── */
+.status-banner {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 32px 0;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.stat {
+  text-align: center;
+}
+.stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1;
+}
+.stat-value.pass { color: var(--green); }
+.stat-value.fail { color: var(--red); }
+.stat-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* ── Sections ──────────────────────────────── */
+section {
+  margin-bottom: 48px;
+}
+section h2 {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--text-bright);
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Module Grid ───────────────────────────── */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.module-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.module-card:hover {
+  border-color: var(--accent);
+}
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+}
+.module-card .mod-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+.module-card .mod-count {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.module-card .mod-bar {
+  margin-top: 10px;
+  height: 4px;
+  background: var(--bg3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.module-card .mod-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+/* ── Sector Grid ───────────────────────────── */
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+.sector-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.sector-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sector-dot.ok { background: var(--green); }
+.sector-dot.fail { background: var(--red); }
+
+/* ── Epistemic Bars ────────────────────────── */
+.ep-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.ep-label {
+  width: 120px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.ep-bar {
+  flex: 1;
+  height: 20px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.ep-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+.ep-count {
+  width: 30px;
+  font-size: 12px;
+  color: var(--text-bright);
+  font-weight: 500;
+}
+
+/* ── Theorem Table ─────────────────────────── */
+.theorem-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+thead th {
+  background: var(--bg3);
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(42,54,80,0.5);
+  vertical-align: top;
+}
+tbody tr:hover {
+  background: rgba(88,166,255,0.04);
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+.badge-pass { background: rgba(63,185,80,0.15); color: var(--green); }
+.badge-fail { background: rgba(248,81,73,0.15); color: var(--red); }
+.badge-mod {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+.key-result {
+  color: var(--text-dim);
+  font-size: 11px;
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Search/Filter ─────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-bar input {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  width: 250px;
+}
+.filter-bar input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.filter-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 14px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover, .filter-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── SCC section ───────────────────────────── */
+.scc-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.scc-box .scc-title {
+  font-weight: 500;
+  color: var(--yellow);
+  margin-bottom: 6px;
+}
+.scc-members {
+  font-size: 11px;
+  color: var(--text-dim);
+  word-break: break-all;
+}
+
+/* ── Footer ────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 40px 0 20px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ── Animations ────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+section {
+  animation: fadeUp 0.4s ease both;
+}
+section:nth-child(2) { animation-delay: 0.05s; }
+section:nth-child(3) { animation-delay: 0.10s; }
+section:nth-child(4) { animation-delay: 0.15s; }
+section:nth-child(5) { animation-delay: 0.20s; }
+section:nth-child(6) { animation-delay: 0.25s; }
+section:nth-child(7) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>Admissibility Physics Framework</h1>
+  <div class="subtitle">Master Verification Report</div>
+  <div class="version">v5.0.0 &middot; Engine v15.0 &middot; 2026-02-18 07:58:27 UTC</div>
+</div>
+
+<!-- Status Banner -->
+<div class="status-banner">
+  <div class="stat">
+    <div class="stat-value pass">129/129</div>
+    <div class="stat-label">Theorems Passed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">0</div>
+    <div class="stat-label">Assertions</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">0</div>
+    <div class="stat-label">Free Parameters</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">0.53s</div>
+    <div class="stat-label">Runtime</div>
+  </div>
+</div>
+
+<!-- Modules -->
+<section>
+<h2>Modules</h2>
+<div class="module-grid">
+  <div class="module-card" style="border-left: 3px solid #4FC3F7">
+    <div class="mod-name">core</div>
+    <div class="mod-count">27/27 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#4FC3F7"></div></div>
+  </div>
+  <div class="module-card" style="border-left: 3px solid #81C784">
+    <div class="mod-name">gauge</div>
+    <div class="mod-count">22/22 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#81C784"></div></div>
+  </div>
+  <div class="module-card" style="border-left: 3px solid #FFB74D">
+    <div class="mod-name">generations</div>
+    <div class="mod-count">46/46 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#FFB74D"></div></div>
+  </div>
+  <div class="module-card" style="border-left: 3px solid #CE93D8">
+    <div class="mod-name">spacetime</div>
+    <div class="mod-count">8/8 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#CE93D8"></div></div>
+  </div>
+  <div class="module-card" style="border-left: 3px solid #F06292">
+    <div class="mod-name">gravity</div>
+    <div class="mod-count">8/8 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#F06292"></div></div>
+  </div>
+  <div class="module-card" style="border-left: 3px solid #4DD0E1">
+    <div class="mod-name">cosmology</div>
+    <div class="mod-count">4/4 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#4DD0E1"></div></div>
+  </div>
+  <div class="module-card" style="border-left: 3px solid #FFF176">
+    <div class="mod-name">validation</div>
+    <div class="mod-count">5/5 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#FFF176"></div></div>
+  </div>
+  <div class="module-card" style="border-left: 3px solid #A1887F">
+    <div class="mod-name">supplements</div>
+    <div class="mod-count">9/9 passed</div>
+    <div class="mod-bar"><div class="mod-bar-fill" style="width:100.0%;background:#A1887F"></div></div>
+  </div>
+</div>
+</section>
+
+<!-- Sectors -->
+<section>
+<h2>Sector Verdicts</h2>
+<div class="sector-grid">
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Axiom Foundation (3)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Quantum Admissibility (24)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Gauge & Fields (22)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Generations & Mixing (46)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Spacetime Arena (8)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Gravity (8)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Cosmology (4)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Observational Validation (5)</span>
+  </div>
+  <div class="sector-item">
+    <div class="sector-dot ok"></div>
+    <span>Consistency Supplements (9)</span>
+  </div>
+</div>
+</section>
+
+<!-- Epistemic Distribution -->
+<section>
+<h2>Epistemic Distribution</h2>
+<div class="ep-row">
+  <div class="ep-label">P</div>
+  <div class="ep-bar"><div class="ep-bar-fill" style="width:100.0%"></div></div>
+  <div class="ep-count">123</div>
+</div>
+<div class="ep-row">
+  <div class="ep-label">P_structural</div>
+  <div class="ep-bar"><div class="ep-bar-fill" style="width:2.4390243902439024%"></div></div>
+  <div class="ep-count">3</div>
+</div>
+<div class="ep-row">
+  <div class="ep-label">POSTULATE</div>
+  <div class="ep-bar"><div class="ep-bar-fill" style="width:1.6260162601626018%"></div></div>
+  <div class="ep-count">2</div>
+</div>
+<div class="ep-row">
+  <div class="ep-label">AXIOM</div>
+  <div class="ep-bar"><div class="ep-bar-fill" style="width:0.8130081300813009%"></div></div>
+  <div class="ep-count">1</div>
+</div>
+</section>
+
+<!-- Dependency Cycles -->
+<section>
+<h2>Dependency Cycles (Tarjan SCC)</h2>
+<p style="color:var(--text-dim);margin-bottom:12px">109 of 129 theorems acyclic. 1 strongly connected component(s):</p>
+<div class="scc-box">
+  <div class="scc-title">SCC 1 — 20 theorems</div>
+  <div class="scc-members">L_AF_capacity, T19, T21b, T22, T23, T24, T25a, T26, T27c, T27d</div>
+</div>
+<p style="color:var(--text-dim);font-size:11px;margin-top:8px">
+These represent mutual-constraint systems (overdetermined fixed points),
+not circular reasoning. See ARCHITECTURE.md for details.</p>
+</section>
+
+<!-- Theorem Table -->
+<section>
+<h2>Full Theorem Registry</h2>
+<div class="filter-bar">
+  <input type="text" id="search" placeholder="Search theorems..." onkeyup="filterTable()">
+  <button class="filter-btn active" onclick="filterMod(this,'all')">All</button>
+  <button class="filter-btn" onclick="filterMod(this,'core')">core</button>
+  <button class="filter-btn" onclick="filterMod(this,'gauge')">gauge</button>
+  <button class="filter-btn" onclick="filterMod(this,'generations')">generations</button>
+  <button class="filter-btn" onclick="filterMod(this,'spacetime')">spacetime</button>
+  <button class="filter-btn" onclick="filterMod(this,'gravity')">gravity</button>
+  <button class="filter-btn" onclick="filterMod(this,'cosmology')">cosmology</button>
+  <button class="filter-btn" onclick="filterMod(this,'validation')">validation</button>
+  <button class="filter-btn" onclick="filterMod(this,'supplements')">supplements</button>
+</div>
+<div class="theorem-table-wrap" style="max-height:600px;overflow-y:auto">
+<table>
+<thead>
+<tr>
+  <th>Status</th>
+  <th>Name</th>
+  <th>Module</th>
+  <th>Tier</th>
+  <th>Epistemic</th>
+  <th>Key Result</th>
+</tr>
+</thead>
+<tbody id="theorem-body">
+<tr data-mod="core" data-name="a1">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">A1</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">-1</td>
+  <td style="color:var(--text-dim)">AXIOM</td>
+  <td class="key-result" title="Finite enforcement capacity exists (C &gt; 0, C &lt; infinity)">Finite enforcement capacity exists (C &gt; 0, C &lt; infinity)</td>
+</tr>
+<tr data-mod="core" data-name="m">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">M</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">-1</td>
+  <td style="color:var(--text-dim)">POSTULATE</td>
+  <td class="key-result" title="Multiple distinguishable subsystems exist">Multiple distinguishable subsystems exist</td>
+</tr>
+<tr data-mod="core" data-name="nt">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">NT</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">-1</td>
+  <td style="color:var(--text-dim)">POSTULATE</td>
+  <td class="key-result" title="Subsystems are not all identical">Subsystems are not all identical</td>
+</tr>
+<tr data-mod="core" data-name="l_epsilon*">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_epsilon*</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="eps_Gamma &gt; 0: meaningful distinctions have minimum enforcement cost">eps_Gamma &gt; 0: meaningful distinctions have minimum enforcement cost</td>
+</tr>
+<tr data-mod="core" data-name="l_irr">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_irr</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="A1 + L_nc ==&gt; A4 (irreversibility derived, not assumed)">A1 + L_nc ==&gt; A4 (irreversibility derived, not assumed)</td>
+</tr>
+<tr data-mod="core" data-name="l_nc">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_nc</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="A1 + L_loc ==&gt; non-closure (derived, formerly axiom A2)">A1 + L_loc ==&gt; non-closure (derived, formerly axiom A2)</td>
+</tr>
+<tr data-mod="core" data-name="l_loc">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_loc</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="A1 + M + NT ==&gt; A3 (locality derived, not assumed)">A1 + M + NT ==&gt; A3 (locality derived, not assumed)</td>
+</tr>
+<tr data-mod="core" data-name="l_t2">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_T2</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Non-commutativity + concrete state =&gt; explicit finite GNS (dim=4)">Non-commutativity + concrete state =&gt; explicit finite GNS (dim=4)</td>
+</tr>
+<tr data-mod="core" data-name="l_cost">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_cost</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="C(G) = dim(G)*epsilon is FORCED (unique cost under A1)">C(G) = dim(G)*epsilon is FORCED (unique cost under A1)</td>
+</tr>
+<tr data-mod="core" data-name="l_irr_uniform">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_irr_uniform</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="L_irr extends to gauge-matter sector (no additional assumptions)">L_irr extends to gauge-matter sector (no additional assumptions)</td>
+</tr>
+<tr data-mod="core" data-name="l_omega_sign">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_Omega_sign</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="ÃƒÅ½Ã‚Â©_inter = ÃƒÂ¢Ã‹â€ Ã¢â‚¬â„¢I(A:B); sign dichotomy ÃƒÅ½Ã‚Â©_local ÃƒÂ¢Ã¢â‚¬Â°Ã‚Â¥ 0 / ÃƒÅ½Ã‚Â©_inter ÃƒÂ¢Ã¢â‚¬Â°Ã‚">ÃƒÅ½Ã‚Â©_inter = ÃƒÂ¢Ã‹â€ Ã¢â‚¬â„¢I(A:B); sign dichotomy ÃƒÅ½Ã‚Â©_local ÃƒÂ¢Ã¢â‚¬Â°Ã‚Â¥ 0 / ÃƒÅ½Ã‚Â©_inter ÃƒÂ¢Ã¢â‚¬Â°Ã‚</td>
+</tr>
+<tr data-mod="core" data-name="m_omega">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">M_Omega</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="p(s) = 1/|Omega| is FORCED at Bekenstein saturation (not assumed) [P]">p(s) = 1/|Omega| is FORCED at Bekenstein saturation (not assumed) [P]</td>
+</tr>
+<tr data-mod="core" data-name="p_exhaust">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">P_exhaust</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Q1 + Q2 exhaustive; 3 + 16 + 42 = 61 unique MECE partition [P]">Q1 + Q2 exhaustive; 3 + 16 + 42 = 61 unique MECE partition [P]</td>
+</tr>
+<tr data-mod="core" data-name="t0">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T0</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Axiom witnesses: Delta=4, BFS record-lock, non-commuting operators">Axiom witnesses: Delta=4, BFS record-lock, non-commuting operators</td>
+</tr>
+<tr data-mod="core" data-name="t1">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T1</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Non-closure ==&gt; exists incompatible observables (dim=2 witness)">Non-closure ==&gt; exists incompatible observables (dim=2 witness)</td>
+</tr>
+<tr data-mod="core" data-name="t2">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T2</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Non-closure ==&gt; operator algebra on Hilbert space [P via L_T2]">Non-closure ==&gt; operator algebra on Hilbert space [P via L_T2]</td>
+</tr>
+<tr data-mod="core" data-name="t3">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T3</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Locality + operator algebra ==&gt; gauge bundle + connection">Locality + operator algebra ==&gt; gauge bundle + connection</td>
+</tr>
+<tr data-mod="core" data-name="t_born">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_Born</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Born rule is unique admissibility-invariant probability (Gleason, d&gt;=3)">Born rule is unique admissibility-invariant probability (Gleason, d&gt;=3)</td>
+</tr>
+<tr data-mod="core" data-name="t_cptp">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_CPTP</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="CPTP = unique admissibility-preserving evolution (Kraus verified)">CPTP = unique admissibility-preserving evolution (Kraus verified)</td>
+</tr>
+<tr data-mod="core" data-name="t_hermitian">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_Hermitian</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Hermiticity derived from A1+L_nc+L_irr (no external import)">Hermiticity derived from A1+L_nc+L_irr (no external import)</td>
+</tr>
+<tr data-mod="core" data-name="t_m">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_M</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Independence disjoint anchors">Independence disjoint anchors</td>
+</tr>
+<tr data-mod="core" data-name="t_canonical">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_canonical</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Sheaf of sets + non-local cost: sets compose (separatedness + gluing), costs do not (Omega_inter = entanglement)">Sheaf of sets + non-local cost: sets compose (separatedness + gluing), costs do not (Omega_inter = entanglement)</td>
+</tr>
+<tr data-mod="core" data-name="t_entropy">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_entropy</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Entropy = committed capacity; S(rho) = -Tr(rho log rho) verified">Entropy = committed capacity; S(rho) = -Tr(rho log rho) verified</td>
+</tr>
+<tr data-mod="core" data-name="t_epsilon">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_epsilon</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="epsilon = min nonzero enforcement cost &gt; 0">epsilon = min nonzero enforcement cost &gt; 0</td>
+</tr>
+<tr data-mod="core" data-name="t_eta">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_eta</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="eta/epsilon &lt;= 1">eta/epsilon &lt;= 1</td>
+</tr>
+<tr data-mod="core" data-name="t_kappa">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_kappa</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="kappa = 2">kappa = 2</td>
+</tr>
+<tr data-mod="core" data-name="t_tensor">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_tensor</td>
+  <td><span class="badge-mod" style="background:#4FC3F722;color:#4FC3F7">core</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Tensor product forced by compositional closure; entanglement generic (S=0.6931)">Tensor product forced by compositional closure; entanglement generic (S=0.6931)</td>
+</tr>
+<tr data-mod="gauge" data-name="t4">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T4</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">1</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Gauge structure = SU(N_c) * SU(2) * U(1) [P, zero imports]">Gauge structure = SU(N_c) * SU(2) * U(1) [P, zero imports]</td>
+</tr>
+<tr data-mod="gauge" data-name="t5">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T5</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">1</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Hypercharge ratios uniquely determined (quadratic proof)">Hypercharge ratios uniquely determined (quadratic proof)</td>
+</tr>
+<tr data-mod="gauge" data-name="t_gauge">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_gauge</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">1</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="SU(3)*SU(2)*U(1) = capacity-optimal (dim=12)">SU(3)*SU(2)*U(1) = capacity-optimal (dim=12)</td>
+</tr>
+<tr data-mod="gauge" data-name="t_particle">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_particle</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">1</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="SSB forced, mass gap from V(Phi), particles = quantum modes">SSB forced, mass gap from V(Phi), particles = quantum modes</td>
+</tr>
+<tr data-mod="gauge" data-name="t_confinement">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_confinement</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">1</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Color confinement: non-singlets excluded at IR saturation [P]">Color confinement: non-singlets excluded at IR saturation [P]</td>
+</tr>
+<tr data-mod="gauge" data-name="theorem_r">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">Theorem_R</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">1</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Three carrier requirements (R1+R2+R3) derived from A1 alone [P]">Three carrier requirements (R1+R2+R3) derived from A1 alone [P]</td>
+</tr>
+<tr data-mod="gauge" data-name="b1_prime">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">B1_prime</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">1</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Confining carrier must be complex type (V != V*) [P]">Confining carrier must be complex type (V != V*) [P]</td>
+</tr>
+<tr data-mod="gauge" data-name="t_field">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_field</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="SM fermions UNIQUE within SU(3) reps &lt;= dim 10 (Phase 1: 4680 templates) + analytic exclusion for higher reps (Phase 2: ">SM fermions UNIQUE within SU(3) reps &lt;= dim 10 (Phase 1: 4680 templates) + analytic exclusion for higher reps (Phase 2: </td>
+</tr>
+<tr data-mod="gauge" data-name="t_channels">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_channels</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="channels_EW = 4 [P]">channels_EW = 4 [P]</td>
+</tr>
+<tr data-mod="gauge" data-name="t7">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T7</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="N_gen = 3 [P]">N_gen = 3 [P]</td>
+</tr>
+<tr data-mod="gauge" data-name="t9">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T9</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="3! = 6 orthogonal record sectors">3! = 6 orthogonal record sectors</td>
+</tr>
+<tr data-mod="gauge" data-name="t_higgs">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_Higgs</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Massive Higgs-like scalar required (proved); mass bridge 0.4% (witness, not derived)">Massive Higgs-like scalar required (proved); mass bridge 0.4% (witness, not derived)</td>
+</tr>
+<tr data-mod="gauge" data-name="t_theta_qcd">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_theta_QCD</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="theta_QCD = 0 [P]; cost(theta!=0) &gt; cost(theta=0) at equal capacity">theta_QCD = 0 [P]; cost(theta!=0) &gt; cost(theta=0) at equal capacity</td>
+</tr>
+<tr data-mod="gauge" data-name="t4e">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T4E</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="3 generations with hierarchical structure">3 generations with hierarchical structure</td>
+</tr>
+<tr data-mod="gauge" data-name="t4f">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T4F</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Saturation = 75% (near-full)">Saturation = 75% (near-full)</td>
+</tr>
+<tr data-mod="gauge" data-name="l_count">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_count</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="C_total = 61 structural enforcement channels (derived, not assumed)">C_total = 61 structural enforcement channels (derived, not assumed)</td>
+</tr>
+<tr data-mod="gauge" data-name="l_weinberg_dim">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_Weinberg_dim</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="d_W = 5: unique Delta_L=2 operator (exhaustive, no import) [P]">d_W = 5: unique Delta_L=2 operator (exhaustive, no import) [P]</td>
+</tr>
+<tr data-mod="gauge" data-name="l_dim_angle">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_dim_angle</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="theta_op = pi/d_op [P]; Yukawa pi/4 verified, Weinberg pi/5 predicted (0.110% error, 110x isolated)">theta_op = pi/d_op [P]; Yukawa pi/4 verified, Weinberg pi/5 predicted (0.110% error, 110x isolated)</td>
+</tr>
+<tr data-mod="gauge" data-name="l_anomaly_free">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_anomaly_free</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="7/7 anomaly conditions satisfied [P]; charge quantization derived; quark-lepton relation Y_L = -N_c*Y_Q">7/7 anomaly conditions satisfied [P]; charge quantization derived; quark-lepton relation Y_L = -N_c*Y_Q</td>
+</tr>
+<tr data-mod="gauge" data-name="t_proton">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_proton</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="B exactly conserved [P]; tau_p = infinity; falsifiable (any observed decay refutes)">B exactly conserved [P]; tau_p = infinity; falsifiable (any observed decay refutes)</td>
+</tr>
+<tr data-mod="gauge" data-name="l_strong_cp_synthesis">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_strong_CP_synthesis</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="theta=0 (no gain), delta_CKM=pi/4 (gain&gt;cost) [P]; no axion; unified CP explanation">theta=0 (no gain), delta_CKM=pi/4 (gain&gt;cost) [P]; no axion; unified CP explanation</td>
+</tr>
+<tr data-mod="gauge" data-name="t_vacuum_stability">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_vacuum_stability</td>
+  <td><span class="badge-mod" style="background:#81C78422;color:#81C784">gauge</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Vacuum absolutely stable [P]; unique minimum; no tunneling (no deeper vacuum)">Vacuum absolutely stable [P]; unique minimum; no tunneling (no deeper vacuum)</td>
+</tr>
+<tr data-mod="generations" data-name="l_af_capacity">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_AF_capacity</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Non-Abelian AF from det(A)=m&gt;0; Abelian Landau pole from det=0 [P]">Non-Abelian AF from det(A)=m&gt;0; Abelian Landau pole from det=0 [P]</td>
+</tr>
+<tr data-mod="generations" data-name="t4g">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T4G</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Hierarchy from Q(g) = {0,5,9} [P]">Hierarchy from Q(g) = {0,5,9} [P]</td>
+</tr>
+<tr data-mod="generations" data-name="t4g_q31">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T4G_Q31</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Neutrino hierarchy [P]; absolute scale needs T10">Neutrino hierarchy [P]; absolute scale needs T10</td>
+</tr>
+<tr data-mod="generations" data-name="t6">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T6</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="sin^2theta_W(M_U) = 3/8 (uses SU(5) embedding)">sin^2theta_W(M_U) = 3/8 (uses SU(5) embedding)</td>
+</tr>
+<tr data-mod="generations" data-name="t6b">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T6B</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="sin^2theta_W: 3/8 -&gt; ~0.231 [P with 1-loop import]">sin^2theta_W: 3/8 -&gt; ~0.231 [P with 1-loop import]</td>
+</tr>
+<tr data-mod="generations" data-name="t19">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T19</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="M = 3 routing sectors">M = 3 routing sectors</td>
+</tr>
+<tr data-mod="generations" data-name="t20">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T20</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="RG == enforcement cost renormalization">RG == enforcement cost renormalization</td>
+</tr>
+<tr data-mod="generations" data-name="t_lv">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_LV</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="dx/ds = k*x(1-x)(x*-x) is the UNIQUE admissible 2-sector flow [P]">dx/ds = k*x(1-x)(x*-x) is the UNIQUE admissible 2-sector flow [P]</td>
+</tr>
+<tr data-mod="generations" data-name="t21">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T21</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="beta_i = -gamma_i w_i + lambda w_i sum_j a_ij w_j">beta_i = -gamma_i w_i + lambda w_i sum_j a_ij w_j</td>
+</tr>
+<tr data-mod="generations" data-name="t22">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T22</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="a_dressed = [[1,x],[x,x^2+3]], det=3 (x-independent)">a_dressed = [[1,x],[x,x^2+3]], det=3 (x-independent)</td>
+</tr>
+<tr data-mod="generations" data-name="t23">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T23</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="sin2_W = 3/13 (formula verified)">sin2_W = 3/13 (formula verified)</td>
+</tr>
+<tr data-mod="generations" data-name="t24">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T24</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="sin^2theta_W = 3/13 ~= 0.2308 (0.19% error)">sin^2theta_W = 3/13 ~= 0.2308 (0.19% error)</td>
+</tr>
+<tr data-mod="generations" data-name="t21a">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T21a</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="p(s) = w(s)/W(s) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ p* = 3/13 (non">p(s) = w(s)/W(s) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ p* = 3/13 (non</td>
+</tr>
+<tr data-mod="generations" data-name="t21b">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T21b</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="V(w) Lyapunov: A sym pos def (det=3) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å">V(w) Lyapunov: A sym pos def (det=3) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å</td>
+</tr>
+<tr data-mod="generations" data-name="t21c">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T21c</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Basin = entire positive orthant RÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â²ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒ">Basin = entire positive orthant RÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â²ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒ</td>
+</tr>
+<tr data-mod="generations" data-name="t25a">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T25a</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="x [1/3, 2/3]">x [1/3, 2/3]</td>
+</tr>
+<tr data-mod="generations" data-name="t25b">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T25b</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Saturation pushes x -&gt; 1/2">Saturation pushes x -&gt; 1/2</td>
+</tr>
+<tr data-mod="generations" data-name="t26">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T26</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="gamma_ratio &gt;= 3, exact = 17/4 (T27d)">gamma_ratio &gt;= 3, exact = 17/4 (T27d)</td>
+</tr>
+<tr data-mod="generations" data-name="t27c">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T27c</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="x = 1/2">x = 1/2</td>
+</tr>
+<tr data-mod="generations" data-name="t27d">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T27d</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="gamma_2/gamma_1 = 17/4">gamma_2/gamma_1 = 17/4</td>
+</tr>
+<tr data-mod="generations" data-name="t_sin2theta">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_sin2theta</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="sin^2theta_W = 3/13 [P_structural] (no remaining gates)">sin^2theta_W = 3/13 [P_structural] (no remaining gates)</td>
+</tr>
+<tr data-mod="generations" data-name="t_s0">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_S0</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="S0 proved -&gt; sin^2theta_W = 3/13 has no remaining gates">S0 proved -&gt; sin^2theta_W = 3/13 has no remaining gates</td>
+</tr>
+<tr data-mod="generations" data-name="l_gram">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_Gram</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="a_ij = Gram(demand vectors); det = m = 3 by Cauchy-Binet; sin2_W = 3/13 routes through canonical object">a_ij = Gram(demand vectors); det = m = 3 by Cauchy-Binet; sin2_W = 3/13 routes through canonical object</td>
+</tr>
+<tr data-mod="generations" data-name="l_gram_generation">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_Gram_generation</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Generation overlap = cos(theta) from L_Gram + ONB completeness [P]">Generation overlap = cos(theta) from L_Gram + ONB completeness [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_beta">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_beta</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="ÃƒÅ½Ã‚Â²-function form = canonical object response to coarse-graining">ÃƒÅ½Ã‚Â²-function form = canonical object response to coarse-graining</td>
+</tr>
+<tr data-mod="generations" data-name="l_gen_path">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_gen_path</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Generation graph = path P_3 [P]">Generation graph = path P_3 [P]</td>
+</tr>
+<tr data-mod="generations" data-name="t_capacity_ladder">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_capacity_ladder</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="q_B = (7, 4, 0) [P]; charges derived, FN form imported">q_B = (7, 4, 0) [P]; charges derived, FN form imported</td>
+</tr>
+<tr data-mod="generations" data-name="l_d2q">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_D2q</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="D2q = -eps (universal, kappa-independent) [P]">D2q = -eps (universal, kappa-independent) [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_h_curv">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_H_curv</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="h = (0, 1, 0) [P | L_eps* -&gt; l1]">h = (0, 1, 0) [P | L_eps* -&gt; l1]</td>
+</tr>
+<tr data-mod="generations" data-name="t_q_higgs">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_q_Higgs</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="q_H = (7, 5, 0) [P]">q_H = (7, 5, 0) [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_holonomy_phase">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_holonomy_phase</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="phi = pi/4 [P]; bridge closed via L_Gram_generation">phi = pi/4 [P]; bridge closed via L_Gram_generation</td>
+</tr>
+<tr data-mod="generations" data-name="l_adjoint_sep">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_adjoint_sep</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Delta_k = 3 from channel crossing operations [P]">Delta_k = 3 from channel crossing operations [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_channel_crossing">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_channel_crossing</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="c_Hu/c_Hd = x^3 = 1/8 [P]">c_Hu/c_Hd = x^3 = 1/8 [P]</td>
+</tr>
+<tr data-mod="generations" data-name="t_ckm">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_CKM</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="CKM 6/6 within 5%, zero free parameters [P]">CKM 6/6 within 5%, zero free parameters [P]</td>
+</tr>
+<tr data-mod="generations" data-name="t_pmns">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_PMNS</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="PMNS 3/3 within 0.2%, zero free params [P]; mean 0.11%">PMNS 3/3 within 0.2%, zero free params [P]; mean 0.11%</td>
+</tr>
+<tr data-mod="generations" data-name="t_nu_ordering">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_nu_ordering</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Normal ordering [P]; inherits from T_PMNS">Normal ordering [P]; inherits from T_PMNS</td>
+</tr>
+<tr data-mod="generations" data-name="l_color_gram">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_color_Gram</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="cos(pi/2N) = sqrt(N)/2 iff N in {2,3}; x=1/2 [P]">cos(pi/2N) = sqrt(N)/2 iff N in {2,3}; x=1/2 [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_mass_mixing_indep">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_mass_mixing_indep</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Masses and mixing from independent inputs [P]">Masses and mixing from independent inputs [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_conjugation">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_conjugation</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="All conjugation factors [P]">All conjugation factors [P]</td>
+</tr>
+<tr data-mod="generations" data-name="t_mass_ratios">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_mass_ratios</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="6 mass ratios [P], 4/6 within 5%, mean 9.1%">6 mass ratios [P], 4/6 within 5%, mean 9.1%</td>
+</tr>
+<tr data-mod="generations" data-name="l_ll_coherence">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_LL_coherence</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="d_3(nu) = cos(pi/5) from LL exchange coherence [P]">d_3(nu) = cos(pi/5) from LL exchange coherence [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_cap_per_dim">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_cap_per_dim</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="d_1(nu) = x^(7/4) = 0.297302 [P with seesaw import]">d_1(nu) = x^(7/4) = 0.297302 [P with seesaw import]</td>
+</tr>
+<tr data-mod="generations" data-name="l_angular_far_edge">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_angular_far_edge</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="alpha_12(nu) = sin^2*cos^2 = 0.226127 [P]">alpha_12(nu) = sin^2*cos^2 = 0.226127 [P]</td>
+</tr>
+<tr data-mod="generations" data-name="l_boundary_proj">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_boundary_proj</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="d_3 ALL sectors [P]; neutrino LL coherence closes bridge">d_3 ALL sectors [P]; neutrino LL coherence closes bridge</td>
+</tr>
+<tr data-mod="generations" data-name="l_edge_amplitude">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_edge_amplitude</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Edge amplitudes ALL sectors [P]; neutrino angular bridge closed">Edge amplitudes ALL sectors [P]; neutrino angular bridge closed</td>
+</tr>
+<tr data-mod="generations" data-name="l_capacity_depth">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_capacity_depth</td>
+  <td><span class="badge-mod" style="background:#FFB74D22;color:#FFB74D">generations</span></td>
+  <td style="color:var(--text-dim)">3</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="d_1 ALL sectors [P]; neutrino capacity bridge closed">d_1 ALL sectors [P]; neutrino capacity bridge closed</td>
+</tr>
+<tr data-mod="spacetime" data-name="t8">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T8</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="d = 4 uniquely selected (2 DOF, Lovelock unique)">d = 4 uniquely selected (2 DOF, Lovelock unique)</td>
+</tr>
+<tr data-mod="spacetime" data-name="delta_ordering">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">Delta_ordering</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="L_irr -&gt; causal partial order (R1-R4 formalized)">L_irr -&gt; causal partial order (R1-R4 formalized)</td>
+</tr>
+<tr data-mod="spacetime" data-name="delta_fbc">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">Delta_fbc</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="FBC from Lipschitz lemma (L_irr + A1)">FBC from Lipschitz lemma (L_irr + A1)</td>
+</tr>
+<tr data-mod="spacetime" data-name="delta_particle">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">Delta_particle</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Particles = quantum modes of enforcement potential">Particles = quantum modes of enforcement potential</td>
+</tr>
+<tr data-mod="spacetime" data-name="delta_continuum">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">Delta_continuum</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Continuum limit -&gt; smooth manifold M1 (derived)">Continuum limit -&gt; smooth manifold M1 (derived)</td>
+</tr>
+<tr data-mod="spacetime" data-name="delta_signature">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">Delta_signature</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Lorentzian signature (-,+,+,+) from L_irr + HKM">Lorentzian signature (-,+,+,+) from L_irr + HKM</td>
+</tr>
+<tr data-mod="spacetime" data-name="delta_closure">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">Delta_closure</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Delta_geo CLOSED: all sub-theorems resolved">Delta_geo CLOSED: all sub-theorems resolved</td>
+</tr>
+<tr data-mod="spacetime" data-name="t_coleman_mandula">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_Coleman_Mandula</td>
+  <td><span class="badge-mod" style="background:#CE93D822;color:#CE93D8">spacetime</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="G = Poincare x SU(3)xSU(2)xU(1) forced [P]; no SUSY; architecture validated">G = Poincare x SU(3)xSU(2)xU(1) forced [P]; no SUSY; architecture validated</td>
+</tr>
+<tr data-mod="gravity" data-name="t7b">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T7B</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Shared interface -&gt; metric g_munu (polarization identity)">Shared interface -&gt; metric g_munu (polarization identity)</td>
+</tr>
+<tr data-mod="gravity" data-name="t9_grav">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T9_grav</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="G_munu + Lambdag_munu = kappaT_munu (unique in d=4, Lovelock)">G_munu + Lambdag_munu = kappaT_munu (unique in d=4, Lovelock)</td>
+</tr>
+<tr data-mod="gravity" data-name="t10">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T10</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Lambda*G = 3pi/102^61 = 10^-121.6 [P]; CC problem resolved by microstate counting">Lambda*G = 3pi/102^61 = 10^-121.6 [P]; CC problem resolved by microstate counting</td>
+</tr>
+<tr data-mod="gravity" data-name="t_bek">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_Bek</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="S(A) &lt;= kappa*|A| (area law from finite interface capacity)">S(A) &lt;= kappa*|A| (area law from finite interface capacity)</td>
+</tr>
+<tr data-mod="gravity" data-name="l_self_exclusion">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_self_exclusion</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="d_eff = (C_total-1) + C_vacuum = 102">d_eff = (C_total-1) + C_vacuum = 102</td>
+</tr>
+<tr data-mod="gravity" data-name="t_desitter_entropy">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_deSitter_entropy</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="S_dS = 61*ln(102) = 282.123 nats [0.007%]; Lambda*G = 3pi/102^61">S_dS = 61*ln(102) = 282.123 nats [0.007%]; Lambda*G = 3pi/102^61</td>
+</tr>
+<tr data-mod="gravity" data-name="t_graviton">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_graviton</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Graviton: massless spin-2 boson, 2 DOF [P]; m = 0 from gauge invariance">Graviton: massless spin-2 boson, 2 DOF [P]; m = 0 from gauge invariance</td>
+</tr>
+<tr data-mod="gravity" data-name="l_weinberg_witten">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_Weinberg_Witten</td>
+  <td><span class="badge-mod" style="background:#F0629222;color:#F06292">gravity</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="All framework particles pass Weinberg-Witten [P]; graviton has no local T^munu">All framework particles pass Weinberg-Witten [P]; graviton has no local T^munu</td>
+</tr>
+<tr data-mod="cosmology" data-name="l_equip">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_equip</td>
+  <td><span class="badge-mod" style="background:#4DD0E122;color:#4DD0E1">cosmology</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â½ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©_sector = |sector|/C_total at Bekenstein saturation (proved)">ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â½ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©_sector = |sector|/C_total at Bekenstein saturation (proved)</td>
+</tr>
+<tr data-mod="cosmology" data-name="t11">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T11</td>
+  <td><span class="badge-mod" style="background:#4DD0E122;color:#4DD0E1">cosmology</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â½ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©_ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â½ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Âº = 42/61 = 0.6885 (obs: 0.6889,">ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â½ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©_ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â½ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Âº = 42/61 = 0.6885 (obs: 0.6889,</td>
+</tr>
+<tr data-mod="cosmology" data-name="t12">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T12</td>
+  <td><span class="badge-mod" style="background:#4DD0E122;color:#4DD0E1">cosmology</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="DM = gauge-singlet capacity stratum; existence [P_structural], properties [P]">DM = gauge-singlet capacity stratum; existence [P_structural], properties [P]</td>
+</tr>
+<tr data-mod="cosmology" data-name="t12e">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T12E</td>
+  <td><span class="badge-mod" style="background:#4DD0E122;color:#4DD0E1">cosmology</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="f_b = 3/19 = 0.157895 (obs: 0.15713, error 0.51%)">f_b = 3/19 = 0.157895 (obs: 0.15713, error 0.51%)</td>
+</tr>
+<tr data-mod="validation" data-name="t_concordance">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_concordance</td>
+  <td><span class="badge-mod" style="background:#FFF17622;color:#FFF176">validation</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="12 cosmological predictions, 0 params, mean error 4.0%">12 cosmological predictions, 0 params, mean error 4.0%</td>
+</tr>
+<tr data-mod="validation" data-name="t_inflation">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_inflation</td>
+  <td><span class="badge-mod" style="background:#FFF17622;color:#FFF176">validation</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P_structural</td>
+  <td class="key-result" title="N_e_max = 141.1 [P]; n_s=0.9633, r=0.0052 at N*=55 [P_structural]">N_e_max = 141.1 [P]; n_s=0.9633, r=0.0052 at N*=55 [P_structural]</td>
+</tr>
+<tr data-mod="validation" data-name="t_baryogenesis">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_baryogenesis</td>
+  <td><span class="badge-mod" style="background:#FFF17622;color:#FFF176">validation</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P_structural</td>
+  <td class="key-result" title="eta_B = 5.27e-10 (obs 6.12e-10, 13.8%) [P_structural]">eta_B = 5.27e-10 (obs 6.12e-10, 13.8%) [P_structural]</td>
+</tr>
+<tr data-mod="validation" data-name="t_reheating">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_reheating</td>
+  <td><span class="badge-mod" style="background:#FFF17622;color:#FFF176">validation</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P_structural</td>
+  <td class="key-result" title="T_rh ~ 10^18 GeV &gt;&gt; 1 MeV (BBN safe); robust under 10^6 parameter variation">T_rh ~ 10^18 GeV &gt;&gt; 1 MeV (BBN safe); robust under 10^6 parameter variation</td>
+</tr>
+<tr data-mod="validation" data-name="l_sakharov">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_Sakharov</td>
+  <td><span class="badge-mod" style="background:#FFF17622;color:#FFF176">validation</span></td>
+  <td style="color:var(--text-dim)">4</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Sakharov 1+2+3 all derived [P]; coexist pre-saturation, deactivate at freeze-out">Sakharov 1+2+3 all derived [P]; coexist pre-saturation, deactivate at freeze-out</td>
+</tr>
+<tr data-mod="supplements" data-name="t_spin_statistics">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_spin_statistics</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">2</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Integer spin &lt;-&gt; Bose, half-integer &lt;-&gt; Fermi [P]; no anyons, no parastatistics; Pauli exclusion derived">Integer spin &lt;-&gt; Bose, half-integer &lt;-&gt; Fermi [P]; no anyons, no parastatistics; Pauli exclusion derived</td>
+</tr>
+<tr data-mod="supplements" data-name="t_cpt">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_CPT</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="CPT exact [P]; T violation = CP violation = pi/4; m(particle) = m(antiparticle)">CPT exact [P]; T violation = CP violation = pi/4; m(particle) = m(antiparticle)</td>
+</tr>
+<tr data-mod="supplements" data-name="t_second_law">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_second_law</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="dS/dt &gt;= 0 [P]; arrow of time from L_irr; S: 0 -&gt; 282.1 nats during capacity fill">dS/dt &gt;= 0 [P]; arrow of time from L_irr; S: 0 -&gt; 282.1 nats during capacity fill</td>
+</tr>
+<tr data-mod="supplements" data-name="t_decoherence">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_decoherence</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Decoherence from L_irr + T_CPTP [P]; no collapse postulate; Born rule for outcomes">Decoherence from L_irr + T_CPTP [P]; no collapse postulate; Born rule for outcomes</td>
+</tr>
+<tr data-mod="supplements" data-name="t_noether">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_Noether</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="26 conservation laws from 26 symmetry generators [P]">26 conservation laws from 26 symmetry generators [P]</td>
+</tr>
+<tr data-mod="supplements" data-name="t_optical">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_optical</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="S†S = I [P]; optical theorem verified; probability conserved in all scattering">S†S = I [P]; optical theorem verified; probability conserved in all scattering</td>
+</tr>
+<tr data-mod="supplements" data-name="l_cluster">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_cluster</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">0</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Correlations decay exponentially [P]; distant experiments independent">Correlations decay exponentially [P]; distant experiments independent</td>
+</tr>
+<tr data-mod="supplements" data-name="t_bh_information">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">T_BH_information</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Information preserved [P]; Page curve from unitarity; no paradox within framework">Information preserved [P]; Page curve from unitarity; no paradox within framework</td>
+</tr>
+<tr data-mod="supplements" data-name="l_naturalness">
+  <td><span class="badge badge-pass">PASS</span></td>
+  <td style="font-weight:500;color:var(--text-bright)">L_naturalness</td>
+  <td><span class="badge-mod" style="background:#A1887F22;color:#A1887F">supplements</span></td>
+  <td style="color:var(--text-dim)">5</td>
+  <td style="color:var(--text-dim)">P</td>
+  <td class="key-result" title="Hierarchy resolved [P]: area-law DOF -&gt; no quadratic divergence; radiative correction O(1); no SUSY needed">Hierarchy resolved [P]: area-law DOF -&gt; no quadratic divergence; radiative correction O(1); no SUSY needed</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<footer>
+  APF v5.0.0 &middot; Engine v15.0 &middot;
+  129 theorems &middot; 0 assertions &middot;
+  0.53s &middot; stdlib only, zero dependencies
+</footer>
+
+</div>
+
+<script>
+let currentMod = 'all';
+
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const rows = document.querySelectorAll('#theorem-body tr');
+  rows.forEach(r => {
+    const name = r.dataset.name || '';
+    const mod = r.dataset.mod || '';
+    const matchSearch = !q || name.includes(q) || r.textContent.toLowerCase().includes(q);
+    const matchMod = currentMod === 'all' || mod === currentMod;
+    r.style.display = (matchSearch && matchMod) ? '' : 'none';
+  });
+}
+
+function filterMod(btn, mod) {
+  currentMod = mod;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTable();
+}
+</script>
+</body>
+</html>

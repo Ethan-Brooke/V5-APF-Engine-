@@ -1,0 +1,44 @@
+graph TD
+    C[core<br/>27]
+    G[gauge<br/>22]
+    GEN[generations<br/>46]
+    ST[spacetime<br/>8]
+    GR[gravity<br/>8]
+    CO[cosmology<br/>4]
+    V[validation<br/>5]
+    S[supplements<br/>9]
+
+    C --> CO
+    C --> G
+    C --> GEN
+    C --> GR
+    C --> ST
+    C --> S
+    C --> V
+    CO --> GR
+    CO --> V
+    G --> C
+    G --> CO
+    G --> GEN
+    G --> GR
+    G --> ST
+    G --> S
+    G --> V
+    GEN --> G
+    GEN --> GR
+    GEN --> ST
+    GEN --> V
+    GR --> C
+    GR --> CO
+    GR --> G
+    GR --> ST
+    GR --> S
+    GR --> V
+    ST --> G
+    ST --> GEN
+    ST --> GR
+    ST --> S
+    S --> GR
+
+    style V fill:#ffd,stroke:#aa0
+    style S fill:#ffd,stroke:#aa0
